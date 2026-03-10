@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ישיביש - חברותא AI לתורה</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@400;500;700&family=Heebo:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- מסך טעינה ראשוני -->
+    <div id="loading-screen" class="loading-screen">
+        <div class="loading-content">
+            <h1 class="loading-title">ישיביש</h1>
+            <p class="loading-subtitle">טוען ספרי קודש...</p>
+            <div class="loading-spinner"></div>
+            <p id="loading-status" class="loading-status">מתחיל...</p>
+        </div>
+    </div>
+
+    <!-- מסך הזנת API Key -->
+    <div id="api-key-screen" class="api-key-screen hidden">
+        <div class="api-key-container">
+            <div class="api-key-header">
+                <h1 class="api-key-title">ישיביש</h1>
+                <p class="api-key-subtitle">חברותא חכם ללימוד תורה</p>
+            </div>
+            
+            <div class="api-key-card">
+                <h2 class="card-title">הגדרת מפתח API</h2>
+                <p class="card-description">
+                    כדי להשתמש בישיביש, יש להזין מפתח API של Google Gemini.
+                    המפתח נשמר בדפדפן שלך בלבד ואינו נשלח לשום שרת.
+                </p>
+                
+                <div class="form-group">
+                    <label for="api-key-input" class="form-label">מפתח API</label>
+                    <input 
+                        type="password" 
+                        id="api-key-input" 
+                        class="form-input"
+                        placeholder="הזן את מפתח ה-API שלך"
+                    >
+                </div>
+                
+                <button id="save-api-key-btn" class="btn btn-primary">
+                    שמור והתחל
+                </button>
+                
+                <div class="api-key-help">
+                    <p>אין לך מפתח API?</p>
+                    <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener">
+                        קבל מפתח בחינם מ-Google AI Studio
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- מסך הצ'אט הראשי -->
+    <div id="chat-screen" class="chat-screen hidden">
+        <!-- סיידבר -->
+        <aside id="sidebar" class="sidebar">
+            <div class="sidebar-header">
+                <h2 class="sidebar-title">ישיביש</h2>
+                <button id="new-chat-btn" class="btn btn-secondary btn-sm">
+                    שיחה חדשה
+                </button>
+            </div>
+            
+            <div class="sidebar-content">
+                <div id="conversations-list" class="conversations-list">
+                    <!-- השיחות יתווספו כאן דינמית -->
+                </div>
+            </div>
+            
+            <div class="sidebar-footer">
+                <button id="settings-btn" class="btn btn-ghost">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
+                        <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                    הגדרות
+                </button>
+            </div>
+        </aside>
+
+        <!-- כפתור פתיחת סיידבר במובייל -->
+        <button id="toggle-sidebar-btn" class="toggle-sidebar-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </button>
+
+        <!-- אזור הצ'אט -->
+        <main class="chat-main">
+            <div class="chat-container">
+                <!-- הודעות -->
+                <div id="messages-container" class="messages-container">
+                    <div id="welcome-message" class="welcome-message">
+                        <h2>שלום וברכה!</h2>
+                        <p>אני ישיביש, החברותא שלך ללימוד תורה.</p>
+                        <p>שאל אותי כל שאלה בתורה, גמרא, הלכה או מחשבה יהודית.</p>
+                    </div>
+                </div>
+
+                <!-- אזור כתיבת הודעה -->
+                <div class="input-area">
+                    <div class="input-container">
+                        <textarea 
+                            id="message-input" 
+                            class="message-input"
+                            placeholder="שאל את ישיביש..."
+                            rows="1"
+                        ></textarea>
+                        <button id="send-btn" class="btn btn-primary send-btn" disabled>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="22" y1="2" x2="11" y2="13"></line>
+                                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                            </svg>
+                        </button>
+                    </div>
+                    <p class="input-hint">ישיביש משתמש בספרי קודש שנטענו. הוא עלול לטעות - בדוק תמיד במקורות.</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- מודל הגדרות -->
+    <div id="settings-modal" class="modal hidden">
+        <div class="modal-backdrop"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">הגדרות</h2>
+                <button id="close-settings-btn" class="btn btn-ghost btn-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            
+            <div class="modal-body">
+                <div class="settings-section">
+                    <h3 class="settings-section-title">מפתח API</h3>
+                    <div class="form-group">
+                        <input 
+                            type="password" 
+                            id="settings-api-key-input" 
+                            class="form-input"
+                            placeholder="הזן מפתח API חדש"
+                        >
+                    </div>
+                    <button id="update-api-key-btn" class="btn btn-secondary">
+                        עדכן מפתח
+                    </button>
+                </div>
+
+                <div class="settings-section">
+                    <h3 class="settings-section-title">סטטוס ספרי קודש</h3>
+                    <div id="books-status" class="books-status">
+                        <span class="status-indicator"></span>
+                        <span class="status-text">בודק...</span>
+                    </div>
+                    <p class="settings-help">
+                        שים קבצי טקסט (.txt) בתיקייה הראשית או בתיקיות משנה,
+                        ואז הרץ <code>node scan-books.js</code> ליצירת רשימת הקבצים.
+                    </p>
+                </div>
+
+                <div class="settings-section">
+                    <h3 class="settings-section-title">נתונים</h3>
+                    <button id="clear-history-btn" class="btn btn-danger">
+                        מחק את כל השיחות
+                    </button>
+                    <button id="clear-all-btn" class="btn btn-danger">
+                        מחק הכל ואתחל
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
